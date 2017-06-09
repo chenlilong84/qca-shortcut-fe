@@ -2,4 +2,10 @@
 
 *.o
 *.s
-
+.*cmd
+.tmper_versions/
+Module.symvers
+modules.order
+*.ko
+*.mod.c
+*.mod
