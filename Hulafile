@@ -1,0 +1,29 @@
+name 'qca-shortcut-fe'
+
+dep 'linux'
+build_dep 'findutils' unless build_config.os == 'linux'
+
+make_args = %W[
+  CC=#{getenv('CC')}
+  LD=#{getenv('LD')}
+  AR=#{getenv('AR')}
+  KCFLAGS=-march=#{host_config.arch}
+  ARCH=#{host_config.arch_short}
+  -C#{host_config.sysroot}/lib/modules/build
+  INSTALL_MOD_PATH=#{dstroot}
+]
+
+build do
+  make *make_args, "M=#{srcroot}/shortcut-fe", "EXTRA_CFLAGS=-DSFE_SUPPORT_IPV6", "SFE_SUPPORT_IPV6=1"
+  make *make_args, "M=#{srcroot}/simulated-driver"
+  make *make_args, "M=#{srcroot}/fast-classifier", "SFE_SUPPORT_IPV6=y"
+
+  make 'modules_install', *make_args, "M=#{srcroot}/shortcut-fe"
+  make 'modules_install', *make_args, "M=#{srcroot}/simulated-driver"
+  make 'modules_install', *make_args, "M=#{srcroot}/fast-classifier"
+
+  dest = File.join(dstroot, prefix, 'include')
+  cmd 'mkdir', '-p', dest
+  cmd 'cp', File.join(srcroot, 'simulated-driver', 'sfe_drv.h'), dest
+end
+
